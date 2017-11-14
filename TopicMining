@@ -1,0 +1,22 @@
+
+import pandas as pd
+from nltk.tokenize import RegexpTokenizer
+from stop_words import get_stop_words
+from nltk.stem.porter import PorterStemmer
+from gensim import corpora, models
+import gensim
+df  = pd.read_json(r'')
+tokenizer = RegexpTokenizer(r'\w+')
+df = pd.read_json('yelp_academic_dataset_review.json') #insert file path here.
+doc_a  = [i for i in df['reviews'] ]
+en_stop = get_stop_words('en')
+p_stemmer = PorterStemmer()
+for i in range(len(doc_a)):
+    doc_a[i] = doc_a[i].lower()
+    doc_a[i] = tokenizer.tokenize(doc_a[i])
+    doc_a[i] = [j for j in doc_a[i] if not j in en_stop]
+    doc_a[i] = [p_stemmer.stem(k) for k in doc_a[i]]
+dictionary = corpora.Dictionary(doc_a)
+corpus = [dictionary.doc2bow(text) for text in doc_a]
+ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=3, id2word = dictionary, passes=20)
+print(ldamodel.print_topics(num_topics=2, num_words=4))
